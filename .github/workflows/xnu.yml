@@ -50,8 +50,6 @@ jobs:
           git init -q dxb
           git -C dxb fetch -q --depth 1 "$DXB_REPO" "$DXB_SHA"
           git -C dxb checkout -q FETCH_HEAD
-          sed -i '' 's|^        XNU_VERSION=.*|        XNU_VERSION="xnu-8796.141.3"|' dxb/build.sh
-          grep -n 'XNU_VERSION="xnu-8796.141.3"' dxb/build.sh
           cp xnu/patches/*.patch xnu/patches/*.sh dxb/patches/
           sed -i '' 's/ARCHS="x86_64 arm64e" VALID_ARCHS="x86_64 arm64e"/ARCHS="arm64" VALID_ARCHS="arm64" OTHER_CFLAGS="-mkernel -nostdinc -Wno-packed -mcpu=cortex-a53"/' dxb/build.sh
           grep -c 'OTHER_CFLAGS="-mkernel -nostdinc -Wno-packed -mcpu=cortex-a53"' dxb/build.sh
