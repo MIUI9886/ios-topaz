@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       macos_version:
-        description: macOS release whose xnu to build (13.5 = xnu-8796, iOS 16 era)
+        description: macOS release whose xnu to build (13.5 = xnu-8796.141.3, iOS 16 era)
         default: "13.5"
       kernel_config:
         description: RELEASE / DEVELOPMENT / DEBUG
