@@ -13,7 +13,7 @@ diff --git a/osfmk/arm64/arm_vm_init.c b/osfmk/arm64/arm_vm_init.c
 + */
 +#define SWEET_EARLY_FB_VA (VM_MIN_KERNEL_ADDRESS + ARM_TT_L2_SIZE)
 +
-+static void
++static void __unused
 +sweet_early_map_final(void)
 +{
 +	const vm_map_address_t va = SWEET_EARLY_FB_VA;
@@ -34,25 +34,15 @@ diff --git a/osfmk/arm64/arm_vm_init.c b/osfmk/arm64/arm_vm_init.c
  void
  arm_vm_init(uint64_t memory_size, boot_args * args)
  {
-@@ -2153,20 +2179,28 @@
+@@ -2153,18 +2179,20 @@
  
  	arm_set_user_tbi();
  
-+#if defined(SWEET)
-+	/* phystokv() must still refer to the bootstrap aperture here. */
-+	sweet_early_map_final();
-+#endif
  	arm_vm_physmap_init(args);
  	set_mmu_ttb_alternate(cpu_ttep & TTBR_BADDR_MASK);
  
  	ml_enable_monitor();
  
--	/* The framebuffer VA=PA mapping belongs to the outgoing TTBR0. */
--	sweet_early_disable();
-+#if defined(SWEET)
-+	/* The final TTBR1 is live; leave the outgoing VA=PA framebuffer alias. */
-+	sweet_early_relocate(SWEET_EARLY_FB_VA);
-+#endif
  	set_mmu_ttb(invalid_ttep & TTBR_BADDR_MASK);
  
  	flush_mmu_tlb();
@@ -65,7 +55,7 @@ diff --git a/osfmk/arm64/arm_vm_init.c b/osfmk/arm64/arm_vm_init.c
  
  	// From here on out, we're off the bootstrap translation tables.
  
-@@ -2259,7 +2293,9 @@
+@@ -2259,7 +2287,9 @@
      }
  #endif
  #endif
@@ -75,7 +65,7 @@ diff --git a/osfmk/arm64/arm_vm_init.c b/osfmk/arm64/arm_vm_init.c
  
  	disable_preemption();
  
-@@ -2310,6 +2346,7 @@
+@@ -2310,6 +2340,7 @@
  		va_l1 = va_l2_end;
  		cpu_l1_tte++;
  	}

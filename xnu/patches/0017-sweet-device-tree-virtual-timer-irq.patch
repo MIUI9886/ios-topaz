@@ -35,7 +35,7 @@ diff --git a/pexpert/arm/pe_fiq.c b/pexpert/arm/pe_fiq.c
 +				panic("%s: invalid virtual-timer-intid size %u", __func__, timer_size);
 +			}
 +			uint32_t intid = *(const uint32_t *)timer_prop;
-+			if (intid < 16 || intid >= 32) {
++			if (intid >= 32) {
 +				panic("%s: virtual timer INTID %u is not a PPI", __func__, intid);
 +			}
 +			sweet_vtimer_intid = intid;
