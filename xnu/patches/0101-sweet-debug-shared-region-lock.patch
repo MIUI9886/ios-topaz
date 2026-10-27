@@ -1,38 +1,25 @@
 diff --git a/osfmk/vm/vm_shared_region.c b/osfmk/vm/vm_shared_region.c
-index db1d613..5609a54 100644
+index db1d613..c5f0a98 100644
 --- a/osfmk/vm/vm_shared_region.c
 +++ b/osfmk/vm/vm_shared_region.c
-@@ -1002,6 +1002,8 @@ vm_shared_region_start_address(
+@@ -240,8 +240,11 @@ vm_shared_region_get(
+ 		("shared_region: -> get(%p)\n",
+ 		(void *)VM_KERNEL_ADDRPERM(task)));
+ 
++	printf("SWEET SR: get step1 before task_lock\n");
+ 	task_lock(task);
++	printf("SWEET SR: get step2 after task_lock\n");
+ 	vm_shared_region_lock();
++	printf("SWEET SR: get step3 after shared_region_lock\n");
+ 	shared_region = task->shared_region;
+ 	if (shared_region) {
+ 		assert(shared_region->sr_ref_count > 0);
+@@ -1002,6 +1005,8 @@ vm_shared_region_start_address(
  		(void *)VM_KERNEL_ADDRPERM(shared_region)));
  
  	vm_shared_region_lock();
-+	printf("SWEET SR: lock held, mapping_in_progress=%d\n",
++	printf("SWEET SR: start_address lock held, mapping_in_progress=%d\n",
 +	    shared_region->sr_mapping_in_progress);
  
  	/*
  	 * Wait if there's another thread establishing a mapping
-@@ -1009,6 +1011,7 @@ vm_shared_region_start_address(
- 	 * We want a consistent view of the map...
- 	 */
- 	while (shared_region->sr_mapping_in_progress) {
-+		printf("SWEET SR: WAITING on mapping_in_progress\n");
- 		/* wait for our turn... */
- 		vm_shared_region_sleep(&shared_region->sr_mapping_in_progress,
- 		    THREAD_UNINT);
-@@ -1018,6 +1021,8 @@ vm_shared_region_start_address(
- 
- 	sr_base_address = shared_region->sr_base_address;
- 	sr_first_mapping = shared_region->sr_first_mapping;
-+	printf("SWEET SR: first_mapping=0x%llx base=0x%llx\n",
-+	    (unsigned long long)sr_first_mapping, (unsigned long long)sr_base_address);
- 
- 	if (sr_first_mapping == (mach_vm_offset_t) -1) {
- 		/* shared region is empty */
-@@ -1031,6 +1036,7 @@ vm_shared_region_start_address(
- 	uint32_t slide = shared_region->sr_slide;
- 
- 	vm_shared_region_unlock();
-+	printf("SWEET SR: start_address unlocked, kr=%d\n", kr);
- 
- 	/*
- 	 * Cache shared region info in the task for telemetry gathering, if we're
