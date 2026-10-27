@@ -1,25 +1,27 @@
 diff --git a/osfmk/vm/vm_shared_region.c b/osfmk/vm/vm_shared_region.c
-index db1d613..c5f0a98 100644
+index db1d613..60db807 100644
 --- a/osfmk/vm/vm_shared_region.c
 +++ b/osfmk/vm/vm_shared_region.c
-@@ -240,8 +240,11 @@ vm_shared_region_get(
- 		("shared_region: -> get(%p)\n",
- 		(void *)VM_KERNEL_ADDRPERM(task)));
- 
-+	printf("SWEET SR: get step1 before task_lock\n");
- 	task_lock(task);
-+	printf("SWEET SR: get step2 after task_lock\n");
- 	vm_shared_region_lock();
-+	printf("SWEET SR: get step3 after shared_region_lock\n");
- 	shared_region = task->shared_region;
- 	if (shared_region) {
- 		assert(shared_region->sr_ref_count > 0);
-@@ -1002,6 +1005,8 @@ vm_shared_region_start_address(
+@@ -1002,6 +1002,8 @@ vm_shared_region_start_address(
  		(void *)VM_KERNEL_ADDRPERM(shared_region)));
  
  	vm_shared_region_lock();
-+	printf("SWEET SR: start_address lock held, mapping_in_progress=%d\n",
-+	    shared_region->sr_mapping_in_progress);
++	printf("SWEET SR: lock held, sr=%p mapping_in_progress=%d\n",
++	    (void *)VM_KERNEL_ADDRPERM(shared_region), shared_region->sr_mapping_in_progress);
  
  	/*
  	 * Wait if there's another thread establishing a mapping
+@@ -1015,9 +1017,13 @@ vm_shared_region_start_address(
+ 	}
+ 	assert(!shared_region->sr_mapping_in_progress);
+ 	assert(shared_region->sr_ref_count > 0);
++	printf("SWEET SR: after asserts, sr=%p ref_count=%d\n",
++	    (void *)VM_KERNEL_ADDRPERM(shared_region), shared_region->sr_ref_count);
+ 
+ 	sr_base_address = shared_region->sr_base_address;
+ 	sr_first_mapping = shared_region->sr_first_mapping;
++	printf("SWEET SR: read fields done, base=0x%llx first=0x%llx\n",
++	    (unsigned long long)sr_base_address, (unsigned long long)sr_first_mapping);
+ 
+ 	if (sr_first_mapping == (mach_vm_offset_t) -1) {
+ 		/* shared region is empty */
