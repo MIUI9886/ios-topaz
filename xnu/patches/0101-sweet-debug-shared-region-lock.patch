@@ -32,21 +32,3 @@ diff --git a/osfmk/vm/vm_shared_region.c b/osfmk/vm/vm_shared_region.c
  
  	/*
  	 * Cache shared region info in the task for telemetry gathering, if we're
-diff --git a/bsd/vm/vm_unix.c b/bsd/vm/vm_unix.c
---- a/bsd/vm/vm_unix.c
-+++ b/bsd/vm/vm_unix.c
-@@ -1300,6 +1300,8 @@
- 	SHARED_REGION_TRACE_DEBUG(
- 		("shared_region: %p [%d(%s)] -> check_np(0x%llx)\n",
- 		(void *)VM_KERNEL_ADDRPERM(current_thread()),
- 		proc_getpid(p), p->p_comm,
- 		(uint64_t)uap->start_address));
-+	printf("SWEET SR: check_np ENTER start=0x%llx\n",
-+	    (unsigned long long)uap->start_address);
-@@ -1315,6 +1317,8 @@
- 
- 	/* retrieve the current tasks's shared region */
- 	shared_region = vm_shared_region_get(task);
-+	printf("SWEET SR: check_np after vm_shared_region_get sr=%p\n",
-+	    (void *)VM_KERNEL_ADDRPERM(shared_region));
- 	if (shared_region != NULL) {
