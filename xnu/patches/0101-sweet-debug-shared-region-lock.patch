@@ -1,0 +1,52 @@
+diff --git a/osfmk/vm/vm_shared_region.c b/osfmk/vm/vm_shared_region.c
+--- a/osfmk/vm/vm_shared_region.c
++++ b/osfmk/vm/vm_shared_region.c
+@@ -1250,6 +1250,8 @@
+ 	vm_shared_region_lock();
++	printf("SWEET SR: start_address lock held, mapping_in_progress=%d\n",
++	    shared_region->sr_mapping_in_progress);
+ 
+ 	/*
+ 	 * Wait if there's another thread establishing a mapping
+@@ -1257,6 +1259,7 @@
+ 	 */
+ 	while (shared_region->sr_mapping_in_progress) {
++		printf("SWEET SR: WAITING on mapping_in_progress\n");
+ 		/* wait for our turn... */
+ 		vm_shared_region_sleep(&shared_region->sr_mapping_in_progress,
+ 		    THREAD_UNINT);
+@@ -1267,6 +1270,8 @@
+ 
+ 	sr_base_address = shared_region->sr_base_address;
+ 	sr_first_mapping = shared_region->sr_first_mapping;
++	printf("SWEET SR: first_mapping=0x%llx base=0x%llx\n",
++	    (unsigned long long)sr_first_mapping, (unsigned long long)sr_base_address);
+ 
+ 	if (sr_first_mapping == (mach_vm_offset_t) -1) {
+ 		/* shared region is empty */
+@@ -1280,6 +1285,7 @@
+ 	uint32_t slide = shared_region->sr_slide;
+ 
+ 	vm_shared_region_unlock();
++	printf("SWEET SR: start_address unlocked, kr=%d\n", kr);
+ 
+ 	/*
+ 	 * Cache shared region info in the task for telemetry gathering, if we're
+diff --git a/bsd/vm/vm_unix.c b/bsd/vm/vm_unix.c
+--- a/bsd/vm/vm_unix.c
++++ b/bsd/vm/vm_unix.c
+@@ -1300,6 +1300,8 @@
+ 	SHARED_REGION_TRACE_DEBUG(
+ 		("shared_region: %p [%d(%s)] -> check_np(0x%llx)\n",
+ 		(void *)VM_KERNEL_ADDRPERM(current_thread()),
+ 		proc_getpid(p), p->p_comm,
+ 		(uint64_t)uap->start_address));
++	printf("SWEET SR: check_np ENTER start=0x%llx\n",
++	    (unsigned long long)uap->start_address);
+@@ -1315,6 +1317,8 @@
+ 
+ 	/* retrieve the current tasks's shared region */
+ 	shared_region = vm_shared_region_get(task);
++	printf("SWEET SR: check_np after vm_shared_region_get sr=%p\n",
++	    (void *)VM_KERNEL_ADDRPERM(shared_region));
+ 	if (shared_region != NULL) {
