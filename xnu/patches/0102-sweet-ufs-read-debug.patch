@@ -1,0 +1,22 @@
+diff --git a/bsd/dev/sweet_ufs.c b/bsd/dev/sweet_ufs.c
+--- a/bsd/dev/sweet_ufs.c
++++ b/bsd/dev/sweet_ufs.c
+@@ -237,6 +237,18 @@
+ /* READ(10) of count device blocks at lba into the bounce buffer. */
++static uint64_t ufs_read_count;
++static uint64_t ufs_read_bytes;
++
+ static int
+ ufs_read_blocks(uint64_t lba, uint32_t count)
+ {
++	ufs_read_count++;
++	ufs_read_bytes += (uint64_t)count * UFS_BLOCK;
++	if ((ufs_read_count & 0xff) == 0) {
++		printf("SWEET UFS: read #%llu total=%llu MiB last_lba=0x%llx\n",
++		    (unsigned long long)ufs_read_count,
++		    (unsigned long long)(ufs_read_bytes >> 20),
++		    (unsigned long long)lba);
++	}
+ 	if (lba > UINT32_MAX || count > BOUNCE_SIZE / UFS_BLOCK) {
+ 		return EINVAL;
+ 	}
